@@ -144,7 +144,8 @@ def run():
                     summary_writer.add_scalar(f'eval/{k}', v, num_steps)
                 summary_writer.flush()
                 agent.training = True
-    agent.save_ckpt(prefix=f'finished_{time_str}')
+    agent.save_ckpt(ckpt_folder=os.path.join(os.getcwd(), 'ckpt'),
+                    prefix=f'finished_{time_str}')
 
 
 if __name__ == '__main__':
