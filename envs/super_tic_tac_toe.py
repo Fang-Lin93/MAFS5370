@@ -8,7 +8,7 @@ class SuperTicTacToeEnv(object):
     """
     The game board is of size 6x6.
     The first player who get 4 in a row/column/across the diagonal is the winner.
-    The state is of shape (2, 6, 6), with 0 means the current player and 1 means the opponent.
+    The state is of shape (6, 6, 2), with 0 means the current player and 1 means the opponent.
     The action is an integer between 0 and 35.
     """
 
