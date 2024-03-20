@@ -73,9 +73,6 @@ class Model(struct.PyTreeNode, ABC):
                optimizer: Optional[optax.GradientTransformation] = None,
                clip_grad_norm: float = None) -> 'Model':
         params = network.init(*inputs)  # (rng, other_inputs), params = {"params": ...}
-        # _, params = variables.pop('params')  # why using pop? params = variables['params'] ?
-        # TODO
-        # params = variables.pop('params')  # why using pop? params = variables['params'] ?
 
         if optimizer is not None:
             if clip_grad_norm:

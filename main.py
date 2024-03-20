@@ -137,8 +137,8 @@ def run():
                 }
                 # test against the opponent agent
                 returns, _, lens = evaluate_tic_tac_toe([agent, ts_agent], eval_env, num_episodes=args.num_eval)
-                eval_info['winner_rate'] = returns.mean(axis=0)[0]
-                eval_info['winner_std'] = returns.std(axis=0)[0]
+                eval_info['winning_rate'] = returns.mean(axis=0)[0]
+                eval_info['winning_std'] = returns.std(axis=0)[0]
 
                 for k, v in eval_info.items():
                     summary_writer.add_scalar(f'eval/{k}', v, num_steps)
