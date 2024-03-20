@@ -1,7 +1,7 @@
 # MAFS5370: Reinforcement Learning for the Super Tic-Tac-Toe
 
 A simple implementation of self-play for the game *Super Tic-Tac-Toe*. In *Super Tic-Tac-Toe*, the 
-board is of size 6x6, and the player who occupies 4-successive positions in row, column or diagonally
+board is of size 6x6, and the player who occupies 4-successive positions in row, column or diagonal
 wins. Each move has a stochastic outcome: with probability=0.5 the action is accepted, otherwise the action is 
 randomly placed in the available neighbor cells if possible. 
 
@@ -25,8 +25,6 @@ against the random agent achieves over 90% and the performance still improves wi
 
 The neural networks are built upon the Google's [jax](https://jax.readthedocs.io/en/latest/installation.html) and 
 [flax](https://flax.readthedocs.io/en/latest/index.html) framework with cuda GPU support.
-
-
 
 
 You can refer to [tutorial.ipynb](tutorial.ipynb) for a detailed illustration of methods and codes.
