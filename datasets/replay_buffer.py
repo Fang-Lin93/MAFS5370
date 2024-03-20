@@ -38,7 +38,7 @@ def sample_n_k(n, k):
 
 class ReplayBuffer(object):
     """
-    Discrete-action replay buffer: action are integers of finite values
+    Discrete-action replay buffer: actions are integers of finite values
     """
 
     def __init__(self, obs_shape: tuple, capacity: int, rotation_expand_k: int = 0):

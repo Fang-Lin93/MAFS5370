@@ -15,7 +15,7 @@ class SuperTicTacToeEnv(object):
     def __init__(self, random_place_prob=0.5):
         self.winner = -1
         self.player_id = 0  # current player id
-        self.board = np.zeros((2, 6, 6))
+        self.board = np.zeros((6, 6, 2))
         self.is_game_over = False
 
         self.random_place_prob = random_place_prob
