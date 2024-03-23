@@ -17,6 +17,8 @@ class SuperTicTacToeEnv(object):
         self.player_id = 0  # current player id
         self.board = np.zeros((6, 6, 2))
         self.is_game_over = False
+        self.perturbations = [(-1, -1), (-1, 1), (1, -1), (1, 1),
+                              (0, -1), (0, 1), (-1, 0), (1, 0)]
 
         self.random_place_prob = random_place_prob
 
@@ -41,8 +43,11 @@ class SuperTicTacToeEnv(object):
         if np.random.random() > self.random_place_prob:
             self.board[row, col, self.player_id] += 1  # selection accepted
         else:
-            row += 1 - int(np.random.random() < 0.5) * 2
-            col += 1 - int(np.random.random() < 0.5) * 2  # neighborhood perturbation
+            dr, dc = self.perturbations[np.random.choice(range(8))]
+            row += dr
+            col += dc
+            # row += 1 - int(np.random.random() < 0.5) * 2
+            # col += 1 - int(np.random.random() < 0.5) * 2  # neighborhood perturbation
             if 0 <= row <= 5 and 0 <= col <= 5:  # inside the board
                 action_id = row * 6 + col
                 if occupied[action_id] == 0:  # not occupied
