@@ -148,12 +148,13 @@ class DQNLearner(Agent):
         # epsilon-greedy
         if self.training and jax.random.uniform(key) < self.eps_greedy_fn(self._n_training_steps):
             self.rng, key = jax.random.split(self.rng)
-            action = jax.random.choice(key, np.nonzero(legal_actions)[1])  # without batch support
+            action = jax.random.choice(key, np.nonzero(legal_actions)[0])  # without batch support
             # action = jax.random.randint(key, (observations.shape[0],), 0, self.act_dim)
         else:
+
             self.rng, action = _jit_greedy_actions(self.rng,
                                                    self.critic_tar.apply,
                                                    self.critic_tar.params,
-                                                   observations,
-                                                   legal_actions)
+                                                   observations[np.newaxis, :],
+                                                   legal_actions[np.newaxis, :])
         return int(action)

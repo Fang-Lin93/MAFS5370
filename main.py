@@ -13,8 +13,8 @@ import argparse
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 parser = argparse.ArgumentParser(description='Reinforcement Learning (SuperTicTacToe)')
 parser.add_argument('--seed', default=0, type=int, help='seed')
-# parser.add_argument('--max_episodes', default=100000, type=int, help='maximal number of episodes')
-parser.add_argument('--max_steps', default=10_000_000, type=int, help='maximal number of episodes')
+parser.add_argument('--discount', default=0.95, type=float, help='The discount rate')
+parser.add_argument('--max_steps', default=5_000_000, type=int, help='maximal number of episodes')
 parser.add_argument('--buffer_size', default=1_000_000, type=int, help='capacity of the replay buffer')
 parser.add_argument('--update_interval', default=100, type=int,
                     help="train the agent every 'eval_interval' action steps")
@@ -53,7 +53,9 @@ def run():
                        lr_decay_steps=args.max_steps,
                        greedy_max=1,
                        greedy_min=0.01,
-                       greedy_decay_steps=args.max_steps // args.update_interval // 2)
+                       discount=args.discount,
+                       greedy_decay_steps=args.max_steps // args.update_interval)
+    agent.training = True
 
     # define process recorder, here I name the save directory with the datetime for easy tracking
     time_str = str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
@@ -80,8 +82,8 @@ def run():
 
         # each game process
         while not done:
-            action = ts_agent.sample_actions(observations=board[:, :, [player_id, 1 - player_id]][np.newaxis, :],
-                                             legal_actions=la[np.newaxis, :])
+            action = agent.sample_actions(observations=board[:, :, [player_id, 1 - player_id]],
+                                          legal_actions=la)
 
             actions[player_id] = action
 
@@ -131,14 +133,16 @@ def run():
             if num_steps % args.eval_interval == 0:
                 agent.training = False
                 # test against itself
-                _, ties, _ = evaluate_tic_tac_toe([agent, agent], eval_env, num_episodes=args.num_eval)
+                _, _, ties, _ = evaluate_tic_tac_toe([agent, agent], eval_env, num_episodes=args.num_eval)
                 eval_info = {
                     'self_tie_rate': np.mean(ties)
                 }
                 # test against the opponent agent
-                returns, _, lens = evaluate_tic_tac_toe([agent, ts_agent], eval_env, num_episodes=args.num_eval)
+                wins, returns, _, lens = evaluate_tic_tac_toe([agent, ts_agent], eval_env, num_episodes=args.num_eval)
                 eval_info['winning_rate'] = returns.mean(axis=0)[0]
                 eval_info['winning_std'] = returns.std(axis=0)[0]
+                eval_info['winning_rate'] = wins.count(0) / len(wins)
+                eval_info['episode_lens'] = lens.mean()
 
                 for k, v in eval_info.items():
                     summary_writer.add_scalar(f'eval/{k}', v, num_steps)
