@@ -58,7 +58,7 @@ def _jit_greedy_actions(rng: PRNGKey,
     rng, key = jax.random.split(rng)
 
     # greedy actions  (B, act_dim)
-    p = jnp.exp(critic_tar_apply_fn(critic_tar_params, observations).mean(axis=0)) * legal_actions
+    p = (jnp.exp(critic_tar_apply_fn(critic_tar_params, observations)) + EPS) * legal_actions
     actions = p.argmax(axis=-1)
 
     # used for evaluation
@@ -151,7 +151,6 @@ class DQNLearner(Agent):
             action = jax.random.choice(key, np.nonzero(legal_actions)[0])  # without batch support
             # action = jax.random.randint(key, (observations.shape[0],), 0, self.act_dim)
         else:
-
             self.rng, action = _jit_greedy_actions(self.rng,
                                                    self.critic_tar.apply,
                                                    self.critic_tar.params,

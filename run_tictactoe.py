@@ -2,7 +2,7 @@ import os
 import datetime
 import random
 import numpy as np
-from tqdm import tqdm, trange
+from tqdm import tqdm
 from agents import RandomAgent, DQNLearner
 from envs import SuperTicTacToeEnv
 from envs.super_tic_tac_toe import evaluate_tic_tac_toe
@@ -43,14 +43,14 @@ def run():
                                  rotation_expand_k=3)  # rotation symmetries
 
     # define the opponent agent for testing, here I only have a random agent
-    ts_agent = RandomAgent()
+    ts_agent = RandomAgent(sample_fn=lambda obs_, la_: np.random.choice(la_.reshape(-1).nonzero()[0]))
 
     # define Double DQN agent for learning
     agent = DQNLearner(seed=0,
                        hidden_dims=(64, 64, 64, 1),
                        obs_shape=(6, 6, 2),
                        act_dim=36,
-                       lr_decay_steps=args.max_steps,
+                       lr_decay_steps=args.max_steps // args.update_interval,
                        greedy_max=1,
                        greedy_min=0.01,
                        discount=args.discount,
@@ -69,6 +69,8 @@ def run():
                desc=f'Train Agent={agent.name}',
                smoothing=0.01,
                colour='GREEN')
+
+    best_win_rate = 0.
 
     # main train/test process
     while num_steps < args.max_steps:
@@ -139,8 +141,8 @@ def run():
                 }
                 # test against the opponent agent
                 wins, returns, _, lens = evaluate_tic_tac_toe([agent, ts_agent], eval_env, num_episodes=args.num_eval)
-                eval_info['winning_rate'] = returns.mean(axis=0)[0]
-                eval_info['winning_std'] = returns.std(axis=0)[0]
+                eval_info['mean_return'] = returns.mean(axis=0)[0]
+                eval_info['return_std'] = returns.std(axis=0)[0]
                 eval_info['winning_rate'] = wins.count(0) / len(wins)
                 eval_info['episode_lens'] = lens.mean()
 
@@ -148,6 +150,12 @@ def run():
                     summary_writer.add_scalar(f'eval/{k}', v, num_steps)
                 summary_writer.flush()
                 agent.training = True
+
+                if eval_info['winning_rate'] >= best_win_rate:
+                    agent.save_ckpt(ckpt_folder=os.path.join(os.getcwd(), 'ckpt'),
+                                    prefix=f'best_{time_str}')
+                    best_win_rate = eval_info['winning_rate']
+
     agent.save_ckpt(ckpt_folder=os.path.join(os.getcwd(), 'ckpt'),
                     prefix=f'finished_{time_str}')
 
